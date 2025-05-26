@@ -81,6 +81,8 @@ public class ReporteController {
     
     }
 
+    //Obtener un reporte por ID
+
     @Operation(summary = "Obtener un reporte por ID")
 
     @GetMapping("/Reportes/{reporteId}")
@@ -95,6 +97,8 @@ public class ReporteController {
         return ResponseEntity.notFound().build();
         
     }
+
+    //Actualizar un reporte por ID
 
     @Operation(summary = "Actualizar un reporte por ID")
     
@@ -111,22 +115,38 @@ public class ReporteController {
 
     }
 
+    //Obtener todos los usuarios desde el microservicio de usuarios
+
     @Operation(summary = "Obtener todos los usuarios desde el microservicio de usuarios")
+    
     @GetMapping("/usuarios")
+    
     public ResponseEntity<List<UsuarioDto>> obtenerTodosLosUsuarios() {
+        
         List<UsuarioDto> usuarios = reporteService.obtenerTodosLosUsuarios();
+        
         if (usuarios == null || usuarios.isEmpty()) {
+            
             return ResponseEntity.noContent().build();
+        
         }
         return ResponseEntity.ok(usuarios);
     }
 
+    //Obtener usuario y reporte por reporteId
+
     @Operation(summary = "Obtener usuario y reporte por reporteId")
+    
     @GetMapping("/usuario-reporte/{reporteId}")
+    
     public ResponseEntity<UsuarioReporteDto> obtenerUsuarioYReportePorReporteId(@PathVariable int reporteId) {
+        
         UsuarioReporteDto dto = reporteService.obtenerUsuarioYReportePorReporteId(reporteId);
+        
         if (dto == null) {
+            
             return ResponseEntity.notFound().build();
+        
         }
         return ResponseEntity.ok(dto);
     }

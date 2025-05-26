@@ -189,9 +189,9 @@ public class ReporteService {
 
     public String modificarReporte(Reporte reporte){
         try{
-            // Validar que el reporte exista
+            
             if(reporteRepository.existsByReporteId(reporte.getReporteId())){
-                // Validar que el usuario exista
+                
                 String usuarioUrl = "http://localhost:8080/obtenerUsuario/" + reporte.getRut_usuario();
                 UsuarioDto usuario = restTemplate.getForObject(usuarioUrl, UsuarioDto.class);
 
@@ -251,7 +251,7 @@ public class ReporteService {
         if (usuario == null) {
             return null;
         }
-        // Imprimir en consola: reporteId, datos del usuario y detalles
+        
         System.out.println("ReporteId: " + reporte.getReporteId());
         System.out.println("Usuario: " + usuario.toString());
         System.out.println("Detalles: " + reporte.getDetalles());
