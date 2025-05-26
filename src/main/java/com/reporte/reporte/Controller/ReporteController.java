@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.reporte.reporte.Model.Reporte;
-import com.reporte.reporte.Model.Dto.ReporteDto;
+import com.reporte.reporte.Model.Dto.UsuarioDto;
 import com.reporte.reporte.Service.ReporteService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,26 +24,44 @@ public class ReporteController {
     @Autowired
     private ReporteService reporteService;
 
+    //Obtener todos los reportes
+
     @Operation(summary = "Obtener todos los reportes")
 
     @GetMapping("/Reportes")
     public ResponseEntity<List<Reporte>> mostrarReportes() {
-        if(reporteService.ObtenerTodosLosReportes() != null){;
+
+        List<Reporte> reportes = reporteService.ObtenerTodosLosReportes();
+
+        if(reportes == null || reportes.isEmpty()){;
             
-            return ResponseEntity.ok(reporteService.ObtenerTodosLosReportes());
+           return ResponseEntity.noContent().build();
+
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(reportes);
+
     }
+
+    //Crear un nuevo reporte
 
     @Operation(summary = "Crear un nuevo reporte")
 
     @PostMapping("/Reportes")
     public ResponseEntity<String> crearReporte(@RequestBody Reporte reporte)
     {
+        String respuesta = reporteService.crearReporte(reporte);
+
+        if(respuesta != null) {
+
+            return ResponseEntity.ok(respuesta);
         
-        return ResponseEntity.ok(reporteService.crearReporte(reporte));
+        }
+        
+        return ResponseEntity.notFound().build();
 
     }
+
+    //Eliminar un reporte por ID
 
     @Operation(summary = "Eliminar un reporte por ID")
 
@@ -51,7 +69,14 @@ public class ReporteController {
     public ResponseEntity<String> eliminarReporte(@PathVariable int reporteId)
     { 
          
-        return ResponseEntity.ok(reporteService.eliminarReporte(reporteId));
+        String respuesta = reporteService.eliminarReporte(reporteId);
+
+        if(respuesta == null) {
+
+            return ResponseEntity.notFound().build();
+        
+        }
+        return ResponseEntity.ok(respuesta);
     
     }
 
@@ -85,20 +110,6 @@ public class ReporteController {
 
     }
 
-    @Operation(summary = "Obtener un reporteDto por ID")
     
-    @GetMapping("/obtenerReportes/{reporteId}")
-    public ResponseEntity<ReporteDto> obtenerReporteDto(@PathVariable int reporteId)
-    {
-        if(reporteService.obtenerReporteDto(reporteId) != null){
-            
-            return ResponseEntity.ok(reporteService.obtenerReporteDto(reporteId));
-
-        }
-        return ResponseEntity.notFound().build();
-        
-    }
-
-
 
 }

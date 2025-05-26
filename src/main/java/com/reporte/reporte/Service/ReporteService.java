@@ -6,9 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import com.reporte.reporte.Model.Reporte;
-import com.reporte.reporte.Model.Dto.ReporteDto;
+import com.reporte.reporte.Model.Dto.UsuarioDto;
 import com.reporte.reporte.Model.Entity.ReporteEntity;
 import com.reporte.reporte.Repository.ReporteRepository;
 
@@ -20,6 +21,9 @@ public class ReporteService {
     
     @Autowired
     private ReporteRepository reporteRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     //private List<Reporte> reportes = new ArrayList<>();
     
@@ -41,7 +45,8 @@ public class ReporteService {
             for (ReporteEntity reporte : listaReporte) {
 
                 Reporte nuevoReporte = new Reporte();
-                
+
+                nuevoReporte.setRut_usuario(reporte.getRut_usuario());
                 nuevoReporte.setReporteId(reporte.getReporteId());
                 nuevoReporte.setDetalles(reporte.getDetalles());
 
@@ -85,7 +90,8 @@ public class ReporteService {
             }
 
             Reporte mostrarReporte = new Reporte();
-            
+
+            mostrarReporte.setRut_usuario(reporte.getRut_usuario());
             mostrarReporte.setReporteId(reporte.getReporteId());
             mostrarReporte.setDetalles(reporte.getDetalles());
 
@@ -111,13 +117,26 @@ public class ReporteService {
         
         try{
 
-            Boolean estado = reporteRepository.existsByReporteId(reporte.getReporteId());
-            if(estado != true){
+           Boolean estado = reporteRepository.existsByReporteId(reporte.getReporteId());
+           if(estado != true){
+
+                String usuarioUrl = "http://localhost:8080/obtenerUsuario/" + reporte.getRut_usuario();
                 
+                UsuarioDto usuario = restTemplate.getForObject(usuarioUrl, UsuarioDto.class);
+
+                if(usuario == null || usuario.getRut() == null ){
+
+                    System.out.println("El usuario no fue encontrado");
+                    return null;
+
+                }
+
                 ReporteEntity nuevoReporte = new ReporteEntity();
                 
-                nuevoReporte.setDetalles(reporte.getDetalles());
+                nuevoReporte.setRut_usuario(usuario.getRut());
                 nuevoReporte.setReporteId(reporte.getReporteId());
+                nuevoReporte.setDetalles(reporte.getDetalles());
+
 
                 reporteRepository.save(nuevoReporte);
                 
@@ -125,7 +144,8 @@ public class ReporteService {
             }
             else{
                 
-                return "El soporte ya existe";
+                System.out.println("El soporte ya existe");
+                return null;
 
             }
 
@@ -133,7 +153,7 @@ public class ReporteService {
         catch (Exception e) {
             
             System.out.println("Error al crear el soporte: " + e.getMessage());
-            return "Error al crear el soporte";
+            return null;
 
         }
     }
@@ -143,24 +163,25 @@ public class ReporteService {
         
         try{
             
-            if(reporteRepository.existsByReporteId(reporteId)){
-                
+            Boolean estado = reporteRepository.existsByReporteId(reporteId);
+            if(estado == true){
+
                 reporteRepository.deleteByReporteId(reporteId);
                 
                 return "Soporte eliminado correctamente";
-            }
-            else{
+
+            }else{
                 
-                System.out.println("El soporte no existe");
-                return "El soporte no existe";
+                System.out.println("El sreporte con el ID ingresado no existe");
+                return null;
 
             }
-
+            
         }
         catch (Exception e) {
             
             System.out.println("Error al eliminar el soporte: " + e.getMessage());
-            return "Error al eliminar el soporte";
+            return null;
 
         }
     }
@@ -174,19 +195,27 @@ public class ReporteService {
                 ReporteEntity reporteExistente = reporteRepository.findByReporteId(reporte.getReporteId());
 
                 if (reporteExistente != null) {
-               
+                
+                reporteExistente.setRut_usuario(reporte.getRut_usuario());
                 reporteExistente.setReporteId(reporte.getReporteId());
                 reporteExistente.setDetalles(reporte.getDetalles());
 
                 reporteRepository.save(reporteExistente);
+
+                System.out.println("El soporte ha sido modificado correctamente");
+                return "Modificación exitosa";
+
+                } else {
+                    
+                    System.out.println("El soporte no existe");
+                    return "El soporte no existe";
                 
                 }
-                return "Soporte modificado correctamente";
                 
             }
             else{
                 
-                return "El soporte no existe";
+                return "El soporte con el ID ingresado no existe";
 
             }
 
@@ -197,30 +226,8 @@ public class ReporteService {
             return "Error al modificar el soporte";
 
         }
-    }
+    } 
 
-    public ReporteDto obtenerReporteDto(int reporteId) {
-        try {
-
-            if(reporteRepository.existsByReporteId(reporteId) != null){
-                
-                ReporteEntity nuevoReporte = reporteRepository.findByReporteId(reporteId);
-                ReporteDto responseReporte = new ReporteDto(nuevoReporte.getReporteId(), nuevoReporte.getDetalles());
-
-                return responseReporte;
-            }
-            else{
-                
-                return null;
-
-            }
-            
-        } catch (Exception e) {
-
-            System.out.println("Error al obtener el soporte: " + e.getMessage());
-            return null;
-        }
     
-    }
- 
+    
 }

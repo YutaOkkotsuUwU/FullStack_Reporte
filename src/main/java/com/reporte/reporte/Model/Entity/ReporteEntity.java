@@ -11,12 +11,14 @@ import lombok.Data;
 @Data
 public class ReporteEntity {
 
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reporte_id")
+    
     private int reporteId;
+    
+    @Column(nullable = false)
+    private String rut_usuario;
 
-    @Column(name = "detalles") 
     private String detalles;
     
 }

@@ -7,9 +7,13 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReporteDto {
+public class UsuarioDto {
 
-    private int reporteId;
-    private String detalles;
+    private String rut;
+    private String nombre;
+    private String apellido_paterno;
+    private String correo;
+    private int telefono;
+
     
 }
