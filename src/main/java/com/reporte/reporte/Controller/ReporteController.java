@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.reporte.reporte.Model.Reporte;
 import com.reporte.reporte.Model.Dto.UsuarioDto;
+import com.reporte.reporte.Model.Dto.UsuarioReporteDto;
 import com.reporte.reporte.Service.ReporteService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -101,13 +102,33 @@ public class ReporteController {
     public ResponseEntity<String> modificarReporte(@RequestBody Reporte reporte)
     {
        
-        if (reporteService.modificarReporte(reporte) != null) {
+        if (reporteService.modificarReporte(reporte) != null )  {
 
             return ResponseEntity.ok(reporteService.modificarReporte(reporte));
         
         }
         return ResponseEntity.notFound().build();
 
+    }
+
+    @Operation(summary = "Obtener todos los usuarios desde el microservicio de usuarios")
+    @GetMapping("/usuarios")
+    public ResponseEntity<List<UsuarioDto>> obtenerTodosLosUsuarios() {
+        List<UsuarioDto> usuarios = reporteService.obtenerTodosLosUsuarios();
+        if (usuarios == null || usuarios.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(usuarios);
+    }
+
+    @Operation(summary = "Obtener usuario y reporte por reporteId")
+    @GetMapping("/usuario-reporte/{reporteId}")
+    public ResponseEntity<UsuarioReporteDto> obtenerUsuarioYReportePorReporteId(@PathVariable int reporteId) {
+        UsuarioReporteDto dto = reporteService.obtenerUsuarioYReportePorReporteId(reporteId);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dto);
     }
 
     

@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.reporte.reporte.Model.Reporte;
 import com.reporte.reporte.Model.Dto.UsuarioDto;
+import com.reporte.reporte.Model.Dto.UsuarioReporteDto;
 import com.reporte.reporte.Model.Entity.ReporteEntity;
 import com.reporte.reporte.Repository.ReporteRepository;
 
@@ -186,48 +187,79 @@ public class ReporteService {
         }
     }
 
-    public String  modificarReporte (Reporte reporte){
-        
+    public String modificarReporte(Reporte reporte){
         try{
-            
+            // Validar que el reporte exista
             if(reporteRepository.existsByReporteId(reporte.getReporteId())){
-                
+                // Validar que el usuario exista
+                String usuarioUrl = "http://localhost:8080/obtenerUsuario/" + reporte.getRut_usuario();
+                UsuarioDto usuario = restTemplate.getForObject(usuarioUrl, UsuarioDto.class);
+
+                if(usuario == null || usuario.getRut() == null){
+                    System.out.println("El usuario no fue encontrado");
+                    return "El usuario no existe";
+                }
+
                 ReporteEntity reporteExistente = reporteRepository.findByReporteId(reporte.getReporteId());
 
                 if (reporteExistente != null) {
-                
-                reporteExistente.setRut_usuario(reporte.getRut_usuario());
-                reporteExistente.setReporteId(reporte.getReporteId());
-                reporteExistente.setDetalles(reporte.getDetalles());
+                    reporteExistente.setRut_usuario(reporte.getRut_usuario());
+                    reporteExistente.setReporteId(reporte.getReporteId());
+                    reporteExistente.setDetalles(reporte.getDetalles());
 
-                reporteRepository.save(reporteExistente);
+                    reporteRepository.save(reporteExistente);
 
-                System.out.println("El soporte ha sido modificado correctamente");
-                return "Modificación exitosa";
-
+                    System.out.println("El soporte ha sido modificado correctamente");
+                    return "Modificación exitosa";
                 } else {
-                    
                     System.out.println("El soporte no existe");
                     return "El soporte no existe";
-                
                 }
-                
-            }
-            else{
-                
+            } else {
                 return "El soporte con el ID ingresado no existe";
-
             }
-
         }
         catch (Exception e) {
-            
             System.out.println("Error al modificar el soporte: " + e.getMessage());
             return "Error al modificar el soporte";
-
         }
-    } 
+    }
 
-    
+    public List<UsuarioDto> obtenerTodosLosUsuarios() {
+        try {
+            String url = "http://localhost:8080/usuarios";
+            UsuarioDto[] usuariosArray = restTemplate.getForObject(url, UsuarioDto[].class);
+            if (usuariosArray != null) {
+                return List.of(usuariosArray);
+            } else {
+                return new ArrayList<>();
+            }
+        } catch (Exception e) {
+            System.out.println("Error al obtener los usuarios: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public UsuarioReporteDto obtenerUsuarioYReportePorReporteId(int reporteId) {
+    Reporte reporte = obtenReporte(reporteId);
+    if (reporte == null) {
+        return null;
+    }
+    try {
+        String usuarioUrl = "http://localhost:8080/obtenerUsuario/" + reporte.getRut_usuario();
+        UsuarioDto usuario = restTemplate.getForObject(usuarioUrl, UsuarioDto.class);
+        if (usuario == null) {
+            return null;
+        }
+        // Imprimir en consola: reporteId, datos del usuario y detalles
+        System.out.println("ReporteId: " + reporte.getReporteId());
+        System.out.println("Usuario: " + usuario.toString());
+        System.out.println("Detalles: " + reporte.getDetalles());
+        return new UsuarioReporteDto(usuario, reporte);
+    } catch (Exception e) {
+        System.out.println("Error al obtener usuario y reporte: " + e.getMessage());
+        return null;
+    }
+}
     
 }
